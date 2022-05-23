@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import Image
+from hexOcean_task.settings import MEDIA_URL
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -11,5 +12,8 @@ class ImageSerializer(serializers.ModelSerializer):
         fields = ['image']
 
     def create(self, validated_data):
-        image = Image.objects.create(**validated_data)
-        return image
+        image_object = Image.objects.create(**validated_data)
+        print(image_object.image.url)
+        image_object.image.name = image_object.image.name[len(MEDIA_URL):]
+        image_object.save()
+        return image_object
