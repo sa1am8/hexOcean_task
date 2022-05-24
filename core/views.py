@@ -1,15 +1,17 @@
+import uuid
+
 from rest_framework import status, renderers
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from hexOcean_task.settings import MEDIA_URL
-from .models import Image
+from .models import Image, Plan
 from .serializers import ImageSerializer
 
 
-def index(request):
-    return Response('<h1> check')
+def generate_url(name: str):
+    return '/api/media/' + str(uuid.uuid5(uuid.NAMESPACE_DNS, name)).replace('-', '')[7:]
 
 
 class JpegRenderer(renderers.BaseRenderer):  # also png renderer
@@ -30,7 +32,8 @@ class ImagesApi(APIView):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        #request.data['url'] = request.data.get('image').name
+        if 'image' in request.data:
+            request.data['generated_url'] = generate_url(request.data.get('image').name)
         serializer = ImageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -41,9 +44,11 @@ class ImagesApi(APIView):
 class ImageResizeApi(APIView):
     renderer_classes = (JpegRenderer, JSONRenderer,)
 
-    def get(self, request, image_name):
-        image = Image.objects.filter(image=image_name)
-        if image:
-            image_file = open(MEDIA_URL + image_name, 'rb')
+    def get(self, request, link):
+        plan_name = request.GET.get('plan') if 'plan' in request.GET else None
+        plan = Plan.objects.filter(name=plan_name)
+        image_object = Image.objects.filter(generated_url='/api/media/'+link).first()
+        if image_object:
+            image_file = open(MEDIA_URL + image_object.image.name, 'rb')
             return Response(data=image_file, status=status.HTTP_200_OK, content_type='image/jpeg')
         return Response(data={'error': 'true'}, status=status.HTTP_400_BAD_REQUEST)

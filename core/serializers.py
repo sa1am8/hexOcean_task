@@ -9,11 +9,10 @@ class ImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Image
-        fields = ['image']
+        fields = ['image', 'generated_url']
 
     def create(self, validated_data):
         image_object = Image.objects.create(**validated_data)
-        print(image_object.image.url)
         image_object.image.name = image_object.image.name[len(MEDIA_URL):]
         image_object.save()
         return image_object

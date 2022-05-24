@@ -7,10 +7,17 @@ from django.dispatch import receiver
 
 class Image(models.Model):
     image = models.ImageField(upload_to=''.join(filter(str.isalnum, settings.MEDIA_URL)))
-    #url = models.CharField(max_length=200)
+    generated_url = models.CharField(max_length=250, default='')
 
     def __repr__(self):
         return self.image.name
+
+
+class Plan(models.Model):
+    name = models.CharField(max_length=100)
+    allow_height = models.IntegerField(null=False)
+    originally_uploaded_file = models.BooleanField()
+    expiring_link = models.IntegerField(null=True)
 
 
 @receiver(models.signals.post_delete, sender=Image)
