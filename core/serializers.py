@@ -13,6 +13,4 @@ class ImageSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         image_object = Image.objects.create(**validated_data)
-        image_object.image.name = image_object.image.name[len(MEDIA_URL):]
-        image_object.save()
         return image_object

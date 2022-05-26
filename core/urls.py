@@ -9,5 +9,3 @@ urlpatterns = [
     path('api/media', views.ImagesApi.as_view()),
     path('api/media/<str:link>', views.ImageResizeApi.as_view())
 ]
-
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
